@@ -2,6 +2,8 @@
 
 o7tracker is `click tracker` designed for [Google App Engine][gae] written in [Go].
 
+[![Build Status][travis-ci-badge]][travis-ci]
+[![Go Report Card][goreportcard-badge]][goreportcard]
 
 ## Development & Setup
 
@@ -49,3 +51,7 @@ DELETE /admin/campain/<id>
 [go]: https://golang.org/
 [gae]: https://cloud.google.com/appengine/ 
 [gae-sdk-go]: https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Go
+[travis-ci]: https://travis-ci.org/otobrglez/o7tracker
+[travis-ci-badge]: https://travis-ci.org/otobrglez/o7tracker.svg?branch=master
+[goreportcard-badge]: https://goreportcard.com/badge/otobrglez/o7tracker
+[goreportcard]: https://goreportcard.com/report/otobrglez/o7tracker
