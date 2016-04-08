@@ -1,0 +1,9 @@
+indexes:
+  - kind: Greeting
+    # ancestor: yes
+    properties:
+      - name: Platforms
+      - name: CreatedAt
+        direction: desc
+      - name: UpdatedAt
+      - name: IsDeleted

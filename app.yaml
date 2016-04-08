@@ -1,0 +1,14 @@
+runtime: go
+api_version: go1
+
+env_variables:
+  FALLBACK_URL: 'http://outfit7.com'
+  AUTH_USER: 'admin'
+  AUTH_PASSWORD: 'admin'
+
+handlers:
+  - url: /.*
+    script: _go_app
+
+skip_files:
+  - ^(.*/)?\..*
