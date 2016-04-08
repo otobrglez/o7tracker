@@ -36,7 +36,7 @@ POST /admin/campains
 PUT /admin/campains/<id>
 GET /admin/campains
 DELETE /admin/campain/<id>
-
+```
 
 ## Assumptions
 
