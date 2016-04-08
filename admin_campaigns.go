@@ -45,38 +45,26 @@ func protectedWithBasicAuth(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
 
-func errorToJSON(w http.ResponseWriter, err error) {
-	if err != nil {
-		json, _ := json.Marshal(map[string]interface{}{
-			"status": "error",
-			"msg":    err.Error(),
-		})
-
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write(json)
-		return
-	}
-}
 
 func createCampaign(w http.ResponseWriter, r *http.Request) {
 	repository := Repository{appengine.NewContext(r)}
 
 	jsonFromBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
 	var campaign Campaign
 	err = json.Unmarshal(jsonFromBody, &campaign)
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
 	_, err = repository.SaveCampaign(&campaign, 0)
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
@@ -88,7 +76,7 @@ func createCampaign(w http.ResponseWriter, r *http.Request) {
 func updateCampaign(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Path[(len("/admin/campaigns") + 1):])
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
@@ -96,25 +84,25 @@ func updateCampaign(w http.ResponseWriter, r *http.Request) {
 
 	jsonFromBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
 	campaign, err := repository.GetCampaign(int64(id))
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
 	err = json.Unmarshal(jsonFromBody, &campaign)
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
 	_, err = repository.SaveCampaign(&campaign, int64(id))
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
@@ -133,7 +121,7 @@ func listCampaigns(w http.ResponseWriter, r *http.Request) {
 
 	campaigns, err := repository.ListCampaigns(r.URL.Query())
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
@@ -145,7 +133,7 @@ func listCampaigns(w http.ResponseWriter, r *http.Request) {
 func getCampaign(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.URL.Path[len("/admin/campaigns/"):])
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
@@ -153,7 +141,7 @@ func getCampaign(w http.ResponseWriter, r *http.Request) {
 	repository := Repository{context}
 	campaign, err := repository.GetCampaign(int64(id))
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
@@ -162,17 +150,17 @@ func getCampaign(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func deleteCampaign(w http.ResponseWriter, r *http.Request) {
+func deleteCampaign(w http.ResponseWriter, req *http.Request) {
 	id, err := strconv.Atoi(r.URL.Path[(len("/admin/campaigns") + 1):])
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 
 	repository := Repository{appengine.NewContext(r)}
 	err = repository.DeleteCampaign(int64(id))
 	if err != nil {
-		errorToJSON(w, err)
+		ErrorToJSON(w, err)
 		return
 	}
 

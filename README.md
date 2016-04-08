@@ -1,6 +1,6 @@
 # o7tracker
 
-o7tracker is `click tracker` designed for [Google App Engine][gae] written in [Go].
+o7tracker is high-performance `click tracker` designed for [Google App Engine][gae] written in [Go].
 
 [![Build Status][travis-ci-badge]][travis-ci]
 [![Go Report Card][goreportcard-badge]][goreportcard]
@@ -25,13 +25,19 @@ Tracker should be up and running on
 curl <app_name>.appspot.com
 ```
 
-## API
+## APIs
 
 ### Tracker API
 
+Tracker exposes one endpoint that requires presence of `campaign_id` and `platform`. 
+
+```
+GET /track/:id?platform=Android
+```
+
 ### Admin API
 
-Admin API requires basic auth on all following endpoints:
+[Admin campaigns API](./admin_campaigns.go) requires [HTTP basic authentication][basic-auth] on all following endpoints:
 
 ```
 POST /admin/campains
@@ -41,8 +47,11 @@ PUT /admin/campains/:id
 DELETE /admin/campains/:id
 ```
 
+
 ## Assumptions
 
+- This project assumes that Go is the fastest citizen of [Google App Engine][gae] for this particular task.
+- This project uses that layer caching with sequence `global variable > memcache > datastore`.
 
 ## Author
 
@@ -56,3 +65,4 @@ DELETE /admin/campains/:id
 [travis-ci-badge]: https://travis-ci.org/otobrglez/o7tracker.svg?branch=master
 [goreportcard-badge]: https://goreportcard.com/badge/otobrglez/o7tracker
 [goreportcard]: https://goreportcard.com/report/otobrglez/o7tracker
+[basic-auth]: https://en.wikipedia.org/wiki/Basic_access_authentication

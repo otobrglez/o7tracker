@@ -21,7 +21,12 @@ type Campaign struct {
 	Platforms      []string  `datastore:"platforms" json:"platforms" datastore_type:"StringList" verbose_name:"platforms"`
 }
 
-// Valid validates Campaign class
+type Click struct {
+	CreatedAt time.Time `json:"created_at"`
+	Platform  string    `json:"platform"`
+}
+
+// Valid validates Campaign instance
 func (c *Campaign) Valid() (bool, error) {
 	// Check if all platforms are supported.
 	areAllSupported := true
@@ -44,6 +49,15 @@ func (c *Campaign) Valid() (bool, error) {
 	_, err := url.ParseRequestURI(c.RedirectURL)
 	if err != nil {
 		return false, errors.New(`Invalid "redirect_url"`)
+	}
+
+	return true, nil
+}
+
+// Valid validates Click instance
+func (c *Click) Validate() (bool, error) {
+	if !IsPlatformSupported(c.Platform) {
+		return false, fmt.Errorf("Platform %s is not supported", c.Platform)
 	}
 
 	return true, nil

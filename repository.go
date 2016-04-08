@@ -83,7 +83,11 @@ func (r *Repository) DeleteCampaign(id int64) error {
 	return datastore.Delete(r.context, key)
 }
 
-// AddClickFrom adds click
-func (r *Repository) AddClickFrom(request *http.Request) {
 
+
+// SaveClick
+func (r *Repository) SaveClick(platformId int64, r *http.Request) (Click, error) {
+
+
+	return nil
 }
