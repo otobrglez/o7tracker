@@ -10,8 +10,12 @@ o7tracker is high-performance `click tracker` designed for [Google App Engine][g
 Make sure you have [Google App Engine SDK for Go][gae-sdk-go] installed. Then you can run:
 
 ```bash
-goapp serve
+AUTH_USER=admin AUTH_PASSWORD=admin goapp serve -clear_datastore
 ```
+
+- `AUTH_USER` and `AUTH_PASSWORD` are settings for HTTP basic authentication.
+- For producton environment please [see app.yaml](./app.yaml).
+- `-clear_datastore` flag make sure that local Datastore is clean.
 
 And deploy with
 
@@ -47,11 +51,13 @@ PUT /admin/campains/:id
 DELETE /admin/campains/:id
 ```
 
-
 ## Assumptions
 
 - This project assumes that Go is the fastest citizen of [Google App Engine][gae] for this particular task.
-- This project uses that layer caching with sequence `global variable > memcache > datastore`.
+- This project uses that layer caching with sequence `memcache > datastore`.
+- Further optimisation in caching could also introduce global global variable / slice.
+- Further optimisation could also be to parse `User-Agent` from browser that did request instead of relaying on `?platform=`
+- Further optimisation could be to stream clicks into `InfluxDB` to get real-time overview of clicks.
 
 ## Author
 
