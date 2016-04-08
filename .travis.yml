@@ -1,0 +1,7 @@
+sudo: required
+language: go
+env:
+  - REPO=otobrglez/o7tracker
+script:
+  - go test -v ./...
+
