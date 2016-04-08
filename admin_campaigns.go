@@ -124,6 +124,11 @@ func updateCampaign(w http.ResponseWriter, r *http.Request) {
 }
 
 func listCampaigns(w http.ResponseWriter, r *http.Request) {
+	if strings.Contains(r.URL.Path, "/admin/campaigns/") {
+		getCampaign(w, r)
+		return
+	}
+
 	repository := Repository{appengine.NewContext(r)}
 
 	campaigns, err := repository.ListCampaigns(r.URL.Query())
@@ -133,6 +138,26 @@ func listCampaigns(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json, _ := json.Marshal(campaigns)
+	w.Write(json)
+	return
+}
+
+func getCampaign(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.URL.Path[len("/admin/campaigns/"):])
+	if err != nil {
+		errorToJSON(w, err)
+		return
+	}
+
+	context := appengine.NewContext(r)
+	repository := Repository{context}
+	campaign, err := repository.GetCampaign(int64(id))
+	if err != nil {
+		errorToJSON(w, err)
+		return
+	}
+
+	json, _ := json.Marshal(campaign)
 	w.Write(json)
 	return
 }
