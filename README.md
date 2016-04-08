@@ -36,7 +36,7 @@ Admin API requires basic auth on all following endpoints:
 ```
 POST /admin/campains
 PUT /admin/campains/<id>
-GET /admin/campains
+GET /admin/campains?platforms=Android,WindowsPhone
 DELETE /admin/campain/<id>
 ```
 
