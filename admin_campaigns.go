@@ -10,6 +10,11 @@ import (
 	"strings"
 )
 
+const (
+	adminCampaignsPath       = "/admin/campaigns/"
+	adminCampaignsPathLength = len(adminCampaignsPath)
+)
+
 // AdminCampaigns is REST API for campaigns
 func AdminCampaigns(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -45,7 +50,6 @@ func protectedWithBasicAuth(w http.ResponseWriter, r *http.Request) bool {
 	return true
 }
 
-
 func createCampaign(w http.ResponseWriter, r *http.Request) {
 	repository := Repository{appengine.NewContext(r)}
 
@@ -74,7 +78,7 @@ func createCampaign(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateCampaign(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Path[(len("/admin/campaigns") + 1):])
+	id, err := strconv.ParseInt(r.URL.Path[adminCampaignsPathLength:], 10, 64)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return
@@ -88,7 +92,7 @@ func updateCampaign(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	campaign, err := repository.GetCampaign(int64(id))
+	campaign, err := repository.GetCampaign(id)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return
@@ -100,7 +104,7 @@ func updateCampaign(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = repository.SaveCampaign(&campaign, int64(id))
+	_, err = repository.SaveCampaign(&campaign, id)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return
@@ -112,7 +116,7 @@ func updateCampaign(w http.ResponseWriter, r *http.Request) {
 }
 
 func listCampaigns(w http.ResponseWriter, r *http.Request) {
-	if strings.Contains(r.URL.Path, "/admin/campaigns/") {
+	if strings.Contains(r.URL.Path, adminCampaignsPath) {
 		getCampaign(w, r)
 		return
 	}
@@ -131,7 +135,7 @@ func listCampaigns(w http.ResponseWriter, r *http.Request) {
 }
 
 func getCampaign(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Path[len("/admin/campaigns/"):])
+	id, err := strconv.ParseInt(r.URL.Path[adminCampaignsPathLength:], 10, 64)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return
@@ -139,7 +143,7 @@ func getCampaign(w http.ResponseWriter, r *http.Request) {
 
 	context := appengine.NewContext(r)
 	repository := Repository{context}
-	campaign, err := repository.GetCampaign(int64(id))
+	campaign, err := repository.GetCampaignComputeCounts(id)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return
@@ -150,15 +154,15 @@ func getCampaign(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func deleteCampaign(w http.ResponseWriter, req *http.Request) {
-	id, err := strconv.Atoi(r.URL.Path[(len("/admin/campaigns") + 1):])
+func deleteCampaign(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseInt(r.URL.Path[adminCampaignsPathLength:], 10, 64)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return
 	}
 
 	repository := Repository{appengine.NewContext(r)}
-	err = repository.DeleteCampaign(int64(id))
+	err = repository.DeleteCampaign(id)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return

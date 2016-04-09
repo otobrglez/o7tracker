@@ -1,5 +1,5 @@
 indexes:
-  - kind: Greeting
+  - kind: Campaign
     # ancestor: yes
     properties:
       - name: Platforms
@@ -7,3 +7,8 @@ indexes:
         direction: desc
       - name: UpdatedAt
       - name: IsDeleted
+  - kind: Click
+    properties:
+      - name: CreatedAt
+        direction: desc
+      - name: Platform

@@ -1,20 +1,20 @@
 package o7tracker
 
 import (
-  "net/http"
-  "encoding/json"
+	"encoding/json"
+	"net/http"
 )
 
 // ErrorToJSON outputs nice JSON errors to ResponseWritter
 func ErrorToJSON(w http.ResponseWriter, err error) {
-  if err != nil {
-    json, _ := json.Marshal(map[string]interface{}{
-      "status": "error",
-      "msg":    err.Error(),
-    })
+	if err != nil {
+		json, _ := json.Marshal(map[string]interface{}{
+			"status": "error",
+			"msg":    err.Error(),
+		})
 
-    w.WriteHeader(http.StatusInternalServerError)
-    w.Write(json)
-    return
-  }
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write(json)
+		return
+	}
 }
