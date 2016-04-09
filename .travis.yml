@@ -14,7 +14,8 @@ install:
   - goapp version
 
 script:
-  - goapp get -d -v ./goapp
+  - goapp get -d -v ./...
+  - goapp test ./...
 
 
 
