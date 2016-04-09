@@ -6,7 +6,6 @@ before_install:
   - unzip -q -d "${HOME}" "/tmp/appengine.zip"
   - cd "${HOME}/go_appengine"
   - export GAE=$(pwd)
-  - popd
 
 install:
   - cd "$TRAVIS_BUILD_DIR"
