@@ -107,8 +107,8 @@ curl -s \
   | jq ".click_count" \
   | grep -q 4 || exit 1
 
-# echo "Done with suite."
-# exit 0
+echo "Done with suite."
+exit 0
 
 echo "DELETE /admin/campaigns/$CAMPAIGN_ID"
 curl -s \

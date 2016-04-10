@@ -25,3 +25,7 @@ func TestAddCampaign(t *testing.T) {
 
 	fmt.Println(key)
 }
+
+func TestTrack(t *testing.T) {
+
+}

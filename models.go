@@ -1,6 +1,9 @@
 package o7tracker
 
 import (
+	"appengine"
+	"appengine/datastore"
+	"appengine/memcache"
 	"errors"
 	"fmt"
 	"net/url"
@@ -14,7 +17,7 @@ var SupportedPlatforms = []string{"Android", "IPhone", "WindowsPhone"}
 // Campaign that holds "campaign" information.
 type Campaign struct {
 	ID          int64     `json:"id"`
-	RedirectURL string    `datastore:"" json:"redirect_url"`
+	RedirectURL string    `datastore:"" datastore_type:"Link" json:"redirect_url" `
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	Platforms   []string  `datastore:"platforms" json:"platforms" datastore_type:"StringList" verbose_name:"platforms"`
@@ -27,8 +30,10 @@ type Campaign struct {
 
 // Click model
 type Click struct {
-	CreatedAt   time.Time      `json:"created_at"`
-	Platform    string         `datastore:"" json:"platform"`
+	CampaignID int64     `datastore:"-" json:"-"`
+	Platform   string    `datastore:"" json:"platform"`
+	UserAgent  string    `datastore:"" json:"user_agent"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 // NewCampaign creates new empty campaign
@@ -70,13 +75,60 @@ func (c *Campaign) Valid() (bool, error) {
 	return true, nil
 }
 
+// CacheKeys returns keys for memcache
+func (c *Campaign) CacheKeys() (keys []string) {
+	for _, platform := range c.Platforms {
+		keys = append(keys, fmt.Sprintf("%d-%s", c.ID, platform))
+	}
+	return
+}
+
+// CacheItems returns collection of items to be stored to memcache
+func (c *Campaign) CacheItems() []*memcache.Item {
+	var items []*memcache.Item
+	for _, platform := range c.Platforms {
+		click := Click{
+			CampaignID: c.ID,
+			Platform:   platform,
+		}
+
+		item := &memcache.Item{
+			Key:   click.CacheKey(),
+			Value: []byte(c.RedirectURL),
+		}
+
+		items = append(items, item)
+	}
+
+	return items
+}
+
 // Valid validates Click instance
 func (c *Click) Valid() (bool, error) {
+	if c.Platform == "" {
+		return false, errors.New("Missing platform")
+	}
+
 	if !IsPlatformSupported(c.Platform) {
 		return false, fmt.Errorf("Platform %s is not supported", c.Platform)
 	}
 
+	if c.CampaignID == 0 {
+		return false, errors.New("Missing CampaignID")
+	}
+
 	return true, nil
+}
+
+// DatastoreKey returns Click key for datastore
+func (c *Click) DatastoreKey(context appengine.Context) *datastore.Key {
+	parentKey := datastore.NewKey(context, "Campaign", "", c.CampaignID, nil)
+	return datastore.NewIncompleteKey(context, "Click", parentKey)
+}
+
+// CacheKey returns Click key for memcache
+func (c *Click) CacheKey() string {
+	return fmt.Sprintf("%d-%s", c.CampaignID, c.Platform)
 }
 
 // IsPlatformSupported returns true if platform is supported by the system

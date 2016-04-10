@@ -19,8 +19,7 @@ const (
 func AdminCampaigns(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-	protected := protectedWithBasicAuth(w, r)
-	if !protected {
+	if protected := protectedWithBasicAuth(w, r); !protected {
 		return
 	}
 

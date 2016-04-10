@@ -1,9 +1,8 @@
 # o7tracker
 
-o7tracker is high-performance `click tracker` designed for [Google App Engine][gae] written in [Go].
+o7tracker is high-performance click tracker designed for [Google App Engine][gae] written in [Go].
 
 [![Build Status][travis-ci-badge]][travis-ci]
-[![Go Report Card][goreportcard-badge]][goreportcard]
 
 ## Development & Setup
 
@@ -45,19 +44,70 @@ GET /track/:id?platform=Android
 
 ```
 POST /admin/campains
+```
+
+With following JSON payload:
+
+```json
+{
+    "redirect_url":"https://github.com/otobrglez/o7tracker",
+    "platforms":[
+        "WindowsPhone", "Android", "IPhone"
+    ]
+}
+```
+
+Result:
+
+```json
+{
+  "id": 5928566696968192,
+  "redirect_url": "https://github.com/otobrglez/o7tracker",
+  "created_at": "2016-04-10T21:47:44.519184234Z",
+  "updated_at": "2016-04-10T21:47:44.519184189Z",
+  "platforms": [
+    "WindowsPhone",
+    "Android",
+    "IPhone"
+  ],
+  "click_count": 0,
+  "android_click_count": 0,
+  "iphone_click_count": 0,
+  "windowsphone_click_count": 0
+}
+```
+
+Other endpoints:
+```
 GET /admin/campains/:id
 GET /admin/campains?platforms=Android,WindowsPhone
 PUT /admin/campains/:id
 DELETE /admin/campains/:id
 ```
 
+
+Help yourself with following Postman examples:
+
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/be2b92e7ffc18a31ae38)
+
 ## Assumptions
 
-- This project assumes that Go is the fastest citizen of [Google App Engine][gae] for this particular task.
-- This project uses that layer caching with sequence `memcache > datastore`.
-- Further optimisation in caching could also introduce global global variable / slice.
-- Further optimisation could also be to parse `User-Agent` from browser that did request instead of relaying on `?platform=`
-- Further optimisation could be to stream clicks into `InfluxDB` to get real-time overview of clicks.
+- This project assumes that Go is the fastest citizen of [Google App Engine][gae] and fits perfectly for this particular task.
+- This project uses layered caching with sequence `memcache > datastore`.
+- Further optimisation could also be to parse `User-Agent` from browser
+instead of relaying on `?platform=`
+- Further optimisation could be to stream clicks into `InfluxDB` to get
+real-time overview of clicks.
+- Further optimisation in caching could also introduce global
+slice variable. However that would require some additional work to
+support cases like deletion of campaigns.
+
+
+## Testing
+
+- Code comes with test suite for main components in [repository](./repository_test.go)
+- and [integration test](./integration_test.sh) written in Bash.
+
 
 ## Author
 
