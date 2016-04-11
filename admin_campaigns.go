@@ -142,7 +142,7 @@ func getCampaign(w http.ResponseWriter, r *http.Request) {
 
 	context := appengine.NewContext(r)
 	repository := Repository{context}
-	campaign, err := repository.GetCampaignComputeCounts(id)
+	campaign, err := repository.GetCampaign(id)
 	if err != nil {
 		ErrorToJSON(w, err)
 		return

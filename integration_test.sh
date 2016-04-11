@@ -86,29 +86,43 @@ curl -s \
 
 echo -e "\n=====> Redirection Test"
 
+echo "GET /track/$CAMPAIGN_ID?platform=IPhone"
 curl -s -L --max-redirs 1 $CPARAMS \
   $BASE_URI/track/$CAMPAIGN_ID?platform=IPhone | grep -q "github" || exit 1
 
+echo "GET /track/$CAMPAIGN_ID?platform=IPhone"
 curl -s -L --max-redirs 1 $CPARAMS \
   $BASE_URI/track/$CAMPAIGN_ID?platform=IPhone | grep -q "github" || exit 1
 
+echo "GET /track/$CAMPAIGN_ID?platform=IPhone"
 curl -s -L --max-redirs 1 $CPARAMS \
   $BASE_URI/track/$CAMPAIGN_ID?platform=IPhone | grep -q "github" || exit 1
 
+echo "GET /track/$CAMPAIGN_ID?platform=WindowsPhone"
 curl -s -L --max-redirs 1 $CPARAMS \
   $BASE_URI/track/$CAMPAIGN_ID?platform=WindowsPhone | grep -q "github" || exit 1
 
 sleep 1
 
+echo -e "\n=====> Update stats"
+echo "GET /tasks/update_stats"
+
+curl -s \
+  -u $HTTP_USER:$HTTP_PASSWORD \
+  -H "Accept: application/json" \
+  $BASE_URI/tasks/update_stats \
+  | grep -q "Updated" || exit 1
+
+sleep 0.5
+
 curl -s \
   -u $HTTP_USER:$HTTP_PASSWORD \
   -H "Accept: application/json" \
   $BASE_URI/admin/campaigns/$CAMPAIGN_ID \
-  | jq ".click_count" \
+  | jq -r ".click_count" \
   | grep -q 4 || exit 1
 
-echo "Done with suite."
-exit 0
+echo -e "\n=====> Cleanup"
 
 echo "DELETE /admin/campaigns/$CAMPAIGN_ID"
 curl -s \

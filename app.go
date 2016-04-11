@@ -14,4 +14,5 @@ func init() {
 	http.HandleFunc("/track/", ClickTrack)
 	http.HandleFunc("/admin/campaigns", AdminCampaigns)
 	http.HandleFunc("/admin/campaigns/", AdminCampaigns)
+	http.HandleFunc("/tasks/update_stats", UpdateStats)
 }

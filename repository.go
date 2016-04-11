@@ -34,8 +34,10 @@ func (r *Repository) SaveCampaign(campaign *Campaign, id int64) (*datastore.Key,
 	}
 
 	// Delete & Save from memcache
-	if err := memcache.DeleteMulti(r.context, campaign.CacheKeys()); err != nil {
-		r.context.Infof("Can't delete multi keys for %d", campaign.ID)
+	if id != 0 {
+		if err := memcache.DeleteMulti(r.context, campaign.CacheKeys()); err != nil {
+			r.context.Infof("Can't delete multi keys for %d", campaign.ID)
+		}
 	}
 
 	if err := memcache.SetMulti(r.context, campaign.CacheItems()); err != nil {
@@ -66,7 +68,7 @@ func (r *Repository) ListCampaigns(params map[string][]string) ([]Campaign, erro
 	// d = d.Limit(10)
 	d = d.Order("-CreatedAt")
 
-	campaigns := make([]Campaign, 0, 10)
+	var campaigns []Campaign
 	keys, err := d.GetAll(r.context, &campaigns)
 	if err != nil {
 		return campaigns, err
@@ -92,45 +94,40 @@ func (r *Repository) GetCampaign(id int64) (Campaign, error) {
 func (r *Repository) GetCampaignComputeCounts(id int64) (Campaign, error) {
 	key := datastore.NewKey(r.context, "Campaign", "", id, nil)
 	campaign := NewCampaign()
-	err := datastore.Get(r.context, key, &campaign)
-	if err != nil {
-		return campaign, err
-	}
+	campaign.ID = key.IntID()
 
 	basicQuery := datastore.NewQuery("Click").Ancestor(key).KeysOnly()
 	count, err := basicQuery.Count(r.context)
 	if err != nil {
 		return campaign, err
 	}
+	campaign.ClickCount = count
 
-	androidCount, err := basicQuery.
+	countA, err := basicQuery.
 		Filter("Platform =", "Android").
 		Count(r.context)
 	if err != nil {
 		return campaign, err
 	}
+	campaign.AndroidClickCount = countA
 
-	iphoneCount, err := basicQuery.
+	countP, err := basicQuery.
 		Filter("Platform =", "IPhone").
 		Count(r.context)
 	if err != nil {
 		return campaign, err
 	}
+	campaign.IPhoneClickCount = countP
 
-	windowsPhoneCount, err := basicQuery.
+	countW, err := basicQuery.
 		Filter("Platform =", "WindowsPhone").
 		Count(r.context)
 	if err != nil {
 		return campaign, err
 	}
+	campaign.WindowsPhoneClickCount = countW
 
-	campaign.ID = key.IntID()
-	campaign.ClickCount = count
-	campaign.AndroidClickCount = androidCount
-	campaign.IPhoneClickCount = iphoneCount
-	campaign.WindowsPhoneClickCount = windowsPhoneCount
-
-	return campaign, err
+	return campaign, nil
 }
 
 // DeleteCampaign deletes campaign
@@ -163,7 +160,7 @@ func (r *Repository) Track(click *Click) (Campaign, error) {
 	// Get from memcache
 	inCache := true
 	if item, err := memcache.Get(r.context, click.CacheKey()); err == memcache.ErrCacheMiss {
-		r.context.Infof("Not in cache %s", click.CacheKey())
+		r.context.Infof("Memcache CacheMiss for %s", click.CacheKey())
 		inCache = false
 	} else if err != nil {
 		return Campaign{}, err
@@ -195,6 +192,37 @@ func (r *Repository) Track(click *Click) (Campaign, error) {
 }
 
 // UpdateStats periodically updates stats
-func (r *Repository) UpdateStats() {
-	r.context.Infof("TODO: UpdateStatsForClick (Implement)")
+func (r *Repository) UpdateStats() error {
+	campaigns, err := r.ListCampaigns(map[string][]string{})
+	if err != nil {
+		return err
+	}
+
+	for _, campaign := range campaigns {
+		if err := r.UpdateCampaignStats(&campaign); err != nil {
+			return err
+		}
+	}
+
+	r.context.Infof("Stats updated.")
+	return nil
+}
+
+// UpdateCampaignStats updates stats for given campaign and saves them.
+func (r *Repository) UpdateCampaignStats(campaign *Campaign) error {
+	stats, err := r.GetCampaignComputeCounts(campaign.ID)
+	if err != nil {
+		return err
+	}
+
+	campaign.ClickCount = stats.ClickCount
+	campaign.AndroidClickCount = stats.AndroidClickCount
+	campaign.IPhoneClickCount = stats.IPhoneClickCount
+	campaign.WindowsPhoneClickCount = stats.WindowsPhoneClickCount
+
+	if _, err := r.SaveCampaign(campaign, campaign.ID); err != nil {
+		return err
+	}
+
+	return nil
 }

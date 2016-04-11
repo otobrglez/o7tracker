@@ -10,5 +10,9 @@ handlers:
   - url: /.*
     script: _go_app
 
+  - url: /tasks/update_stats
+    script: _go_app
+    login: admin
+
 skip_files:
   - ^(.*/)?\..*

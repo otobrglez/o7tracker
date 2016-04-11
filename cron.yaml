@@ -1,1 +1,4 @@
 cron:
+  - description: update stats
+    url: /tasks/update_stats
+    schedule: every 5 mins

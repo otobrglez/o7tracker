@@ -2,30 +2,58 @@ package o7tracker
 
 import (
 	"appengine/aetest"
-	"appengine/datastore"
-	"fmt"
 	"testing"
 )
 
-type BankAccount struct {
-	Amount int
-}
-
-func TestAddCampaign(t *testing.T) {
-	c, err := aetest.NewContext(nil)
+func TestTrack(t *testing.T) {
+	context, err := aetest.NewContext(nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer c.Close()
 
-	key := datastore.NewKey(c, "BankAccount", "", 1, nil)
-	if _, err := datastore.Put(c, key, &BankAccount{100}); err != nil {
+	r := Repository{context}
+
+	campaign := Campaign{
+		RedirectURL: "https://github.com",
+		Platforms:   SupportedPlatforms,
+	}
+
+	// Save campaign
+	key, err := r.SaveCampaign(&campaign, 0)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Println(key)
-}
+	// Track campaign click
+	if _, err := r.Track(&Click{
+		CampaignID: key.IntID(),
+		Platform:   SupportedPlatforms[0],
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-func TestTrack(t *testing.T) {
+	// Get stats for campaign
+	stats, err := r.GetCampaignComputeCounts(key.IntID())
+	if err != nil {
+		t.Fatal(err)
+	}
 
+	if stats.ClickCount != 1 {
+		t.Fatal("Stats ware not saved.")
+	}
+
+	// List campaign
+	campaigns, err := r.ListCampaigns(map[string][]string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(campaigns) != 1 {
+		t.Fatalf("Campaigns %d", len(campaigns))
+	}
+
+	// Delete campaign
+	if err := r.DeleteCampaign(key.IntID()); err != nil {
+		t.Fatal(err)
+	}
 }
